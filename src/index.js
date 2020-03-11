@@ -2,13 +2,25 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import "./styles.css"
 
+
 class App extends React.Component {
     constructor() {
         super()
 
         this.state = {
             todo: "",
+            todos: [],
         }
+    }
+
+    componentDidMount() {
+        fetch('http://localhost:5000/todos')
+            .then(response => response.json())
+            .then(data => {
+                this.setState({
+                    todos: data
+                })
+            })
     }
 
 

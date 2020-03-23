@@ -1,6 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import axios from "axios";
+
+
 import "./styles.css"
+import TodoItem from './todo-item';
 
 
 class App extends React.Component {
@@ -13,8 +17,31 @@ class App extends React.Component {
         }
     }
 
+    deleteItem = (id) => {
+        fetch(`https://tdb-flask-todo-api.herokuapp.com/todo/${id}`, {
+            method: "DELETE",
+            
+        })
+        .then(response => {
+            this.setState({
+                todos: this.state.todos.filter(item => {
+                    return item.id !== id
+                })
+            })
+        })
+        .catch(error => {
+            console.log("delete item error", error)
+        })
+    }
+
+    renderTodos = () => {
+        return this.state.todos.map((item) => {
+            return <TodoItem key={item.id} item={item} deleteItem={this.deleteItem}/>
+        })
+    }
+
     componentDidMount() {
-        fetch('http://localhost:5000/todos')
+        fetch('https://tdb-flask-todo-api.herokuapp.com/todos')
             .then(response => response.json())
             .then(data => {
                 this.setState({
@@ -32,8 +59,31 @@ class App extends React.Component {
     }
 
     addTodo = (event) => {
-        console.log('I added a todo')
         event.preventDefault()
+        console.log('post successful')
+
+        axios({
+            method: "post",
+            url: "https://tdb-flask-todo-api.herokuapp.com/todo",
+            header: {
+                "content-type": "application/json"
+            },
+            data: {
+                title: this.state.todo,
+                done: false
+
+            }
+        })
+        .then(data => {
+            console.log(data)
+            this.setState({
+                todos: [...this.state.todos, data.data],
+                todo: "",
+            })
+        })
+        .catch(error => {
+            console.log("add todo error", error)
+        })
     }
 
 
@@ -51,7 +101,11 @@ class App extends React.Component {
                     />
 
                     <button type='submit'>Add</button>
+
+                    
                 </form>
+                
+            {this.renderTodos()}
             </div>
         )
     }
